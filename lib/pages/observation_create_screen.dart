@@ -55,7 +55,8 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
       appBar: AppBar(
         title: const Text('Add Feedback'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -171,6 +172,8 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
           ],
         ),
       ),
+      ),      
+      backgroundColor: Colors.blueGrey[100],
     );
   }
 }
