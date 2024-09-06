@@ -24,7 +24,16 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
   File? _image1;
   File? _image2;
 
+  String? _selectedGymLocation;
+
   final ImagePicker _picker = ImagePicker();
+
+  final List<String> _gymLocations = [
+    'Local: Av. La Paz',
+    'Local: Rep. De Panama',
+    'Local: San Isidro',
+    'Local: Independencia',
+  ];
 
 
   @override
@@ -108,6 +117,9 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                     onChanged: (String? newValue) {
                       setState(() {
                         _recipientType = newValue!;
+                        if (_recipientType != 'Gimnasio') {
+                          _selectedGymLocation = null;
+                        }
                       });
                     },
                     items: <String>['Aplicación', 'Gimnasio']
@@ -121,7 +133,28 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            if(_recipientType == 'Gimnasio')...[
+              DropdownButtonFormField<String>(
+                value: _selectedGymLocation,
+                decoration: InputDecoration(
+                  labelText: 'Local',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedGymLocation = newValue;
+                  });
+                },
+                items: _gymLocations.map<DropdownMenuItem<String>>((String location) {
+                  return DropdownMenuItem<String>(
+                    value: location,
+                    child: Text(location)
+                    );
+                }).toList(),
+                ),
+                const SizedBox(height: 16),
+            ],
             TextFormField(
               controller: _subjectController,
               decoration: InputDecoration(
@@ -197,6 +230,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                     detail: _detailController.text,
                     messageType: _messageType,
                     recipientType: _recipientType,
+                    gymLocation: _recipientType == 'Gimnasio' ? _selectedGymLocation : null,
                     image1: _image1,
                     image2: _image2,
                     timestamp: formattedDate,

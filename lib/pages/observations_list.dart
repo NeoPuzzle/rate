@@ -37,7 +37,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                     CarouselSlider(
                       options: CarouselOptions(
                         height: 200.0,
-                        autoPlay: false,
+                        autoPlay: true,
                         enlargeCenterPage: true,
                         aspectRatio: 16/9,
                         viewportFraction: 0.9,
@@ -63,6 +63,9 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                   ],
                   Text(feedback.messageType),
                   Text('Para: ${feedback.recipientType}'),
+                  if(feedback.recipientType == 'Gimnasio' && feedback.gymLocation != null) ...[
+                    Text('Ubicacion: ${feedback.gymLocation}'),
+                  ],
                   Text('Date: ${feedback.timestamp}'),
                 ],
               ),
@@ -114,12 +117,26 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                           fontSize: 18.0,
                         ),
                       ),
-                      subtitle: Text(
-                        feedback.detail,
-                        style: const TextStyle(
-                          fontSize: 16.0,
-                          color: Colors.black54,
-                        ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            feedback.detail,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          if(feedback.recipientType == 'Gimnasio' && feedback.gymLocation != null) ...[
+                            Text(
+                              'Ubicacion: ${feedback.gymLocation}',
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey[600]),
                       onTap: () {
