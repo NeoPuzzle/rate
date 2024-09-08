@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fullventas_gym_rate/helper/database_helper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -236,6 +237,8 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                     timestamp: formattedDate,
                   );
 
+                  final dbHelper = DatabaseHelper();
+                  dbHelper.insertFeedback(feedback);
                   widget.onFeedbackSubmitted(feedback);
                   Navigator.pop(context);
                 }

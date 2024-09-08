@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:fullventas_gym_rate/helper/database_helper.dart';
 import 'package:fullventas_gym_rate/models/feedbackModel.dart';
 import 'package:fullventas_gym_rate/pages/observation_create_screen.dart';
 class RecognitionSuggestionsListScreen extends StatefulWidget {
@@ -11,6 +12,22 @@ class RecognitionSuggestionsListScreen extends StatefulWidget {
 
 class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsListScreen> {
   final List<Feedbacks> _feedbacks = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFeedbacks();
+  }
+
+   void _loadFeedbacks() async {
+    final dbHelper = DatabaseHelper();
+    final feedbacksDB = await dbHelper.getFeedbacks();
+    setState(() {
+      _feedbacks.clear();
+      _feedbacks.addAll(feedbacksDB);
+    });
+  }
 
   void _addFeedback(Feedbacks feedback) {
     setState(() {
