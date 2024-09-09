@@ -10,6 +10,7 @@ class Feedbacks {
   final File? image1;
   final File? image2;
   final String timestamp;
+  final int? userId;
 
 
   Feedbacks({
@@ -22,6 +23,7 @@ class Feedbacks {
     this.image1,
     this.image2,
     required this.timestamp,
+    this.userId,
   });
 
   Map<String, dynamic> toMap(){
@@ -35,6 +37,7 @@ class Feedbacks {
       'image1': image1?.path,
       'image2': image2?.path,
       'timestamp': timestamp,
+      'user_id': userId,
     };
   }
 

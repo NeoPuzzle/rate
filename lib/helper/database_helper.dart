@@ -25,7 +25,16 @@ class DatabaseHelper {
     version: 1,
     onCreate:(Database db, int version) async {
       await db.execute(
-      '''CREATE TABLE feedbacks(id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, detail TEXT, messageType TEXT, recipientType TEXT, gymLocation TEXT, image1 TEXT, image2 TEXT, timestamp TEXT)''',
+      '''CREATE TABLE feedbacks(id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, detail TEXT, messageType TEXT, recipientType TEXT, gymLocation TEXT, image1 TEXT, image2 TEXT, timestamp TEXT, 
+          user_id INTEGER,
+          FOREIGN KEY(user_id) REFERENCES users(id))''',
+        );
+      await db.execute(
+        '''CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT
+          )''',
         );
       },
     );
@@ -51,6 +60,16 @@ class DatabaseHelper {
     
   }
 
+  Future<void> insertUser(String name, String email) async {
+  final db = await database;
+
+  await db.insert(
+    'users',
+    {'name': name, 'email': email},
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
+
   Future<List<Feedbacks>> getFeedbacks() async {
     final Database db = await database;
     final List<Map<String, dynamic>> maps = await db.query('feedbacks');
@@ -65,7 +84,26 @@ class DatabaseHelper {
         image1: maps[i]['image1'] != null ? File(maps[i]['image1']) : null,
         image2: maps[i]['image2'] != null ? File(maps[i]['image2']) : null,
         timestamp: maps[i]['timestamp'],
+        userId: maps[i]['user_id'],
       );
     });
   }
+
+  Future<String?> getUserNameById(int? userId) async {
+  final dbHelper = DatabaseHelper();
+  final db = await dbHelper.database;
+
+  final List<Map<String, dynamic>> result = await db.query(
+    'users',
+    columns: ['name'], 
+    where: 'id = ?', 
+    whereArgs: [userId],
+  );
+
+  if (result.isNotEmpty) {
+    return result.first['name'] as String?;
+  }
+  
+  return null;
+}
 }

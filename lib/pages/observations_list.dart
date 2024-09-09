@@ -20,7 +20,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
     _loadFeedbacks();
   }
 
-   void _loadFeedbacks() async {
+  void _loadFeedbacks() async {
     final dbHelper = DatabaseHelper();
     final feedbacksDB = await dbHelper.getFeedbacks();
     setState(() {
@@ -35,7 +35,9 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
     });
   }
 
-  void _showFeedbackDetails(Feedbacks feedback) {
+  Future<void> _showFeedbackDetails(Feedbacks feedback) async {
+    final dbHelper = DatabaseHelper();
+    final userName = await dbHelper.getUserNameById(feedback.userId ?? -1);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -84,6 +86,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                     Text('Ubicacion: ${feedback.gymLocation}'),
                   ],
                   Text('Date: ${feedback.timestamp}'),
+                  Text('User: $userName'),
                 ],
               ),
             ),

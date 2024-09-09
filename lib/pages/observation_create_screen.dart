@@ -26,6 +26,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
   File? _image2;
 
   String? _selectedGymLocation;
+  int? _currentUserName;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -41,7 +42,20 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
   void initState() {
     super.initState();
     tz.initializeTimeZones();
+    _fetchCurrentUser();
   }
+
+  Future<void> _fetchCurrentUser() async {
+  final dbHelper = DatabaseHelper();
+  await dbHelper.insertUser('John Doe', 'john.doe@example.com');
+  final db = await dbHelper.database;
+  final List<Map<String, dynamic>> users = await db.query('users', limit: 1);
+  if (users.isNotEmpty) {
+    setState(() {
+      _currentUserName = users.first['id'] as int?;
+    });
+  }
+}
 
   Future<void> _pickImage(int imageNumber) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -235,6 +249,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                     image1: _image1,
                     image2: _image2,
                     timestamp: formattedDate,
+                    userId: _currentUserName,
                   );
 
                   final dbHelper = DatabaseHelper();
