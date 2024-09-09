@@ -128,7 +128,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                         feedback.messageType == 'Reconocimiento'
                           ? Icons.thumb_up
                           : Icons.feedback,
-                        color: Colors.blue[700],
+                        color: Colors.orange[700],
                         ),
                       title: Text(
                         feedback.subject,
@@ -180,14 +180,14 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00BD9D),
+                backgroundColor: Colors.orange,
               ), 
-              child: const Text('Agregar feedback'),
+              child: Text('Agregar feedback', style: TextStyle(color: Colors.grey[900]),),
             ),
           ],
         ),
       ),
-      backgroundColor: Colors.blueGrey[100],
+      backgroundColor: Colors.blueGrey[900],
     );
   }
 }
