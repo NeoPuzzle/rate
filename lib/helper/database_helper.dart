@@ -40,25 +40,25 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> insertFeedback(Feedbacks feedback) async {
-    final db = await database;
+  // Future<void> insertFeedback(Feedbacks feedback) async {
+  //   final db = await database;
 
-    final existingFeedbacks = await db.query(
-      'feedbacks',
-      where: 'timestamp = ?',
-      whereArgs: [feedback.timestamp],
-    );
+  //   final existingFeedbacks = await db.query(
+  //     'feedbacks',
+  //     where: 'timestamp = ?',
+  //     whereArgs: [feedback.timestamp],
+  //   );
 
-    if (existingFeedbacks.isEmpty) {
-      await db.insert('feedbacks',
-      feedback.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    } else {
-      print('Feed duplicado');
-    }
+  //   if (existingFeedbacks.isEmpty) {
+  //     await db.insert('feedbacks',
+  //     feedback.toMap(),
+  //     conflictAlgorithm: ConflictAlgorithm.replace,
+  //     );
+  //   } else {
+  //     print('Feed duplicado');
+  //   }
     
-  }
+  // }
 
   Future<void> insertUser(String name, String email) async {
   final db = await database;
@@ -81,8 +81,8 @@ class DatabaseHelper {
         messageType: maps[i]['messageType'],
         recipientType: maps[i]['recipientType'],
         gymLocation: maps[i]['gymLocation'],
-        image1: maps[i]['image1'] != null ? File(maps[i]['image1']) : null,
-        image2: maps[i]['image2'] != null ? File(maps[i]['image2']) : null,
+        image1Url: maps[i]['image1'] != null ? File(maps[i]['image1']) : null,
+        image2Url: maps[i]['image2'] != null ? File(maps[i]['image2']) : null,
         timestamp: maps[i]['timestamp'],
         userId: maps[i]['user_id'],
       );

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fullventas_gym_rate/helper/database_helper.dart';
+import 'package:fullventas_gym_rate/api/api.service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -10,7 +10,9 @@ import 'package:fullventas_gym_rate/models/feedbackModel.dart';
 class RecognitionSuggestionsScreen extends StatefulWidget {
   final Function(Feedbacks) onFeedbackSubmitted;
 
-  const RecognitionSuggestionsScreen({super.key, required this.onFeedbackSubmitted});
+  const RecognitionSuggestionsScreen({super.key,
+  required this.onFeedbackSubmitted
+  });
 
   @override
   State<RecognitionSuggestionsScreen> createState() => _RecognitionSuggestionsScreenState();
@@ -20,39 +22,89 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _detailController = TextEditingController();
-  String _messageType = 'Reconocimiento';
-  String _recipientType = 'Aplicación';
+  final ApiService _apiService = ApiService();
+
+  String? _messageType;
+  String? _recipientType;
+  String? _selectedGymLocation;
+  String? _currentUserName;
+
   File? _image1;
   File? _image2;
+  
+  
 
-  String? _selectedGymLocation;
-  int? _currentUserName;
+  Map<String, String> _feedbackTypes = {};
+  Map<String, String> _destinationType = {};
+  Map<String, String> _gymLocations = {};
+  Map<String, String> _users = {};
 
   final ImagePicker _picker = ImagePicker();
-
-  final List<String> _gymLocations = [
-    'Local: Av. La Paz',
-    'Local: Rep. De Panama',
-    'Local: San Isidro',
-    'Local: Independencia',
-  ];
 
   @override
   void initState() {
     super.initState();
     tz.initializeTimeZones();
     _fetchCurrentUser();
+    _fetchFeedbackTypes();
+    _fetchDestinationTypes();
+    _fetchLocal();
   }
+  
 
   Future<void> _fetchCurrentUser() async {
-    final dbHelper = DatabaseHelper();
-    await dbHelper.insertUser('John Doe', 'john.doe@example.com');
-    final db = await dbHelper.database;
-    final List<Map<String, dynamic>> users = await db.query('users', limit: 1);
-    if (users.isNotEmpty) {
+    try {
+      final users = await _apiService.fetchUsers();
       setState(() {
-        _currentUserName = users.first['id'] as int?;
+        _users = {for (var item in users) item['name'].toString() : item['id'].toString() }; 
+        if (_users.isNotEmpty) {
+          _currentUserName = _currentUserName ?? _users.keys.first;
+        }
       });
+    } catch (e) {
+      print('Error fetching feedback types: $e');
+    }
+  }
+
+  Future<void> _fetchFeedbackTypes() async {
+    try {
+      final feedbackTypes = await _apiService.fetchTypeFeedback();
+      setState(() {
+        _feedbackTypes = { for (var item in feedbackTypes) item['description'].toString() : item['id'].toString() };
+        if (_feedbackTypes.isNotEmpty) {
+          _messageType = _messageType ?? _feedbackTypes.keys.first;
+        }
+      });
+    } catch (e) {
+      print('Error fetching feedback types: $e');
+    }
+  }
+
+  Future<void> _fetchDestinationTypes() async {
+    try {
+      final destinationTypes = await _apiService.fetchTypeDestination();
+      setState(() {
+        _destinationType = {for (var item in destinationTypes) item['description'].toString() : item['id'].toString()};
+        if (_destinationType.isNotEmpty) {
+          _recipientType = _recipientType ?? _destinationType.keys.first;
+        }
+      });
+    } catch (e) {
+      print('Error fetching destination types: $e');
+    }
+  }
+
+  Future<void> _fetchLocal() async {
+    try {
+      final local = await _apiService.fetchLocal();
+      setState(() {
+        _gymLocations = {for (var item in local) item['name'].toString() : item['id'].toString() };
+        if (_gymLocations.isNotEmpty) {
+          _selectedGymLocation = _selectedGymLocation ?? _gymLocations.keys.first;
+        }
+      });
+    } catch (e) {
+      print('Error fetching local: $e');
     }
   }
 
@@ -94,7 +146,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
               ),
               const SizedBox(height: 16),
               const Text(
-                'SmartFitCV',
+                'GymMuscle',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
               ),
               const SizedBox(height: 24),
@@ -103,6 +155,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _messageType,
+                      dropdownColor: Colors.black,
                       decoration: InputDecoration(
                         labelText: 'Tipo de Feedback',
                         labelStyle: const TextStyle(color: Colors.white70),
@@ -113,21 +166,23 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                       onChanged: (String? newValue) {
                         setState(() {
                           _messageType = newValue!;
+
                         });
                       },
-                      items: <String>['Reconocimiento', 'Sugerencias']
-                          .map<DropdownMenuItem<String>>((String value) {
+                      items: _feedbackTypes.keys.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value, style: const TextStyle(color: Colors.white)),
                         );
                       }).toList(),
+                      // validator: (value) => value == null ? 'Debe seleccionar un tipo de feedback' : null,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _recipientType,
+                      dropdownColor: Colors.black,
                       decoration: InputDecoration(
                         labelText: 'Destinatario',
                         labelStyle: const TextStyle(color: Colors.white70),
@@ -143,8 +198,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                           }
                         });
                       },
-                      items: <String>['Aplicación', 'Gimnasio']
-                          .map<DropdownMenuItem<String>>((String value) {
+                      items: _destinationType.keys.map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value, style: const TextStyle(color: Colors.white)),
@@ -158,6 +212,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
               if (_recipientType == 'Gimnasio') ...[
                 DropdownButtonFormField<String>(
                   value: _selectedGymLocation,
+                  dropdownColor: Colors.black,
                   decoration: InputDecoration(
                     labelText: 'Local',
                     labelStyle: const TextStyle(color: Colors.white70),
@@ -170,7 +225,7 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
                       _selectedGymLocation = newValue;
                     });
                   },
-                  items: _gymLocations.map<DropdownMenuItem<String>>((String location) {
+                  items: _gymLocations.keys.map<DropdownMenuItem<String>>((String location) {
                     return DropdownMenuItem<String>(
                       value: location,
                       child: Text(location, style: const TextStyle(color: Colors.white)),
@@ -269,23 +324,37 @@ class _RecognitionSuggestionsScreenState extends State<RecognitionSuggestionsScr
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed:() async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      final feedback = Feedbacks(
+                      final userId = _users[_currentUserName!] ?? '';
+                      final messageTypeId = _feedbackTypes[_messageType!] ?? '';
+                      final recipientTypeId = _destinationType[_recipientType!] ?? '';
+                      final gymLocationId = _recipientType == 'Gimnasio' ? (_gymLocations[_selectedGymLocation!] ?? '') : '';
+                      
+                      await _apiService.createFeedback(
                         subject: _subjectController.text,
                         detail: _detailController.text,
-                        messageType: _messageType,
-                        recipientType: _recipientType,
-                        gymLocation: _recipientType == 'Gimnasio' ? _selectedGymLocation : null,
-                        image1: _image1,
-                        image2: _image2,
+                        messageType: messageTypeId,
+                        recipientType: recipientTypeId,
+                        gymLocation: gymLocationId,
+                        image1Url: _image1,
+                        image2Url: _image2,
                         timestamp: formattedDate,
-                        userId: _currentUserName,
+                        userId: userId,
                       );
-
-                      final dbHelper = DatabaseHelper();
-                      dbHelper.insertFeedback(feedback);
-                      widget.onFeedbackSubmitted(feedback);
+                      widget.onFeedbackSubmitted(
+                        Feedbacks(
+                          subject: _subjectController.text,
+                        detail: _detailController.text,
+                        messageType: _messageType!,
+                        recipientType: _recipientType!,
+                        gymLocation: _recipientType == 'Gimnasio' ? _selectedGymLocation : null,
+                        image1Url: _image1,
+                        image2Url: _image2,
+                        timestamp: formattedDate,
+                        userId: _currentUserName!,
+                        ),
+                      );
                       Navigator.pop(context);
                     }
                   },

@@ -7,10 +7,10 @@ class Feedbacks {
   final String messageType;
   final String recipientType;
   final String? gymLocation;
-  final File? image1;
-  final File? image2;
+  final File? image1Url;
+  final File? image2Url;
   final String timestamp;
-  final int? userId;
+  final String? userId;
 
 
   Feedbacks({
@@ -20,38 +20,23 @@ class Feedbacks {
     required this.messageType,
     required this.recipientType,
     this.gymLocation,
-    this.image1,
-    this.image2,
+    this.image1Url,
+    this.image2Url,
     required this.timestamp,
     this.userId,
   });
 
-  Map<String, dynamic> toMap(){
-    return {
-      'id': id,
-      'subject': subject,
-      'detail': detail,
-      'messageType': messageType,
-      'recipientType': recipientType,
-      'gymLocation': gymLocation,
-      'image1': image1?.path,
-      'image2': image2?.path,
-      'timestamp': timestamp,
-      'user_id': userId,
-    };
-  }
-
-  factory Feedbacks.fromMap(Map<String, dynamic> map) {
+factory Feedbacks.fromJson(Map<String, dynamic> json) {
     return Feedbacks(
-      id: map['id'],
-      subject: map['subject'],
-      detail: map['detail'],
-      messageType: map['messageType'],
-      recipientType: map['recipientType'],
-      gymLocation: map['gymLocation'],
-      image1: map['image1'] != null ? File(map['image1']) : null,
-      image2: map['image2'] != null ? File(map['image2']) : null,
-      timestamp: map['timestamp'],
+      subject: json['subject'],
+      detail: json['detail'],
+      messageType: json['messageType'],
+      recipientType: json['recipientType'],
+      gymLocation: json['gymLocation'],
+      image1Url: json['image1Url'],
+      image2Url: json['image2Url'],
+      timestamp: json['timestamp'],
+      userId: json['userId'],
     );
   }
 }
