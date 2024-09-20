@@ -12,15 +12,15 @@ class RecognitionSuggestionsListScreen extends StatefulWidget {
 
 class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsListScreen> {
   final List<Feedbacks> _feedbacks = [];
-
+  // final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    _loadFeedbacks();
+    // _loadFeedbacks();
   }
 
-   void _loadFeedbacks() async {
+  void _loadFeedbacks() async {
     final dbHelper = DatabaseHelper();
     final feedbacksDB = await dbHelper.getFeedbacks();
     setState(() {
@@ -35,12 +35,18 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
     });
   }
 
-  void _showFeedbackDetails(Feedbacks feedback) {
+  Future<void> _showFeedbackDetails(Feedbacks feedback) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(feedback.subject),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget> [
+              Text(feedback.timestamp, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
+              Text(feedback.userId!, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
+            ],
+          ) ,          
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -48,9 +54,10 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
+                  Text(feedback.subject, style: const TextStyle(color: Colors.black,fontSize: 18, fontWeight: FontWeight.bold),),
                   Text(feedback.detail),
                   const SizedBox(height: 20),
-                  if (feedback.image1 != null || feedback.image2 != null) ...[
+                  if (feedback.image1Url != null || feedback.image2Url != null) ...[
                     CarouselSlider(
                       options: CarouselOptions(
                         height: 200.0,
@@ -60,16 +67,16 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                         viewportFraction: 0.9,
                       ),
                       items: [
-                        if (feedback.image1 != null)
+                        if (feedback.image1Url != null)
                           Image.file(
-                            feedback.image1!,
+                            feedback.image1Url!,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 200.0,
                           ),
-                        if (feedback.image2 != null)
+                        if (feedback.image2Url != null)
                           Image.file(
-                            feedback.image2!,
+                            feedback.image2Url!,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 200.0,
@@ -78,12 +85,11 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                     ),
                     const SizedBox(height: 10),
                   ],
-                  Text(feedback.messageType),
-                  Text('Para: ${feedback.recipientType}'),
+                  Text(feedback.messageType,style: const TextStyle(fontWeight: FontWeight.bold),),
+                  Text(feedback.recipientType),
                   if(feedback.recipientType == 'Gimnasio' && feedback.gymLocation != null) ...[
-                    Text('Ubicacion: ${feedback.gymLocation}'),
-                  ],
-                  Text('Date: ${feedback.timestamp}'),
+                    Text('${feedback.gymLocation}'),
+                  ],                  
                 ],
               ),
             ),
@@ -125,7 +131,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                         feedback.messageType == 'Reconocimiento'
                           ? Icons.thumb_up
                           : Icons.feedback,
-                        color: Colors.blue[700],
+                        color: Colors.orange[700],
                         ),
                       title: Text(
                         feedback.subject,
@@ -153,6 +159,8 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                               ),
                             ),
                           ],
+                          const SizedBox(height: 8),
+                          Text(feedback.timestamp)
                         ],
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey[600]),
@@ -160,7 +168,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                         _showFeedbackDetails(feedback);
                       },
                     ),
-                  );                  
+                  );
                 },
               ),
             ),
@@ -177,14 +185,14 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00BD9D),
+                backgroundColor: Colors.orange,
               ), 
-              child: const Text('Agregar feedback'),
+              child: Text('Agregar feedback', style: TextStyle(color: Colors.grey[900]),),
             ),
           ],
         ),
       ),
-      backgroundColor: Colors.blueGrey[100],
+      backgroundColor: Colors.blueGrey[900],
     );
   }
 }

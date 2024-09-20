@@ -25,31 +25,50 @@ class DatabaseHelper {
     version: 1,
     onCreate:(Database db, int version) async {
       await db.execute(
-      '''CREATE TABLE feedbacks(id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, detail TEXT, messageType TEXT, recipientType TEXT, gymLocation TEXT, image1 TEXT, image2 TEXT, timestamp TEXT)''',
+      '''CREATE TABLE feedbacks(id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, detail TEXT, messageType TEXT, recipientType TEXT, gymLocation TEXT, image1 TEXT, image2 TEXT, timestamp TEXT, 
+          user_id INTEGER,
+          FOREIGN KEY(user_id) REFERENCES users(id))''',
+        );
+      await db.execute(
+        '''CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        email TEXT
+          )''',
         );
       },
     );
   }
 
-  Future<void> insertFeedback(Feedbacks feedback) async {
-    final db = await database;
+  // Future<void> insertFeedback(Feedbacks feedback) async {
+  //   final db = await database;
 
-    final existingFeedbacks = await db.query(
-      'feedbacks',
-      where: 'timestamp = ?',
-      whereArgs: [feedback.timestamp],
-    );
+  //   final existingFeedbacks = await db.query(
+  //     'feedbacks',
+  //     where: 'timestamp = ?',
+  //     whereArgs: [feedback.timestamp],
+  //   );
 
-    if (existingFeedbacks.isEmpty) {
-      await db.insert('feedbacks',
-      feedback.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    } else {
-      print('Feed duplicado');
-    }
+  //   if (existingFeedbacks.isEmpty) {
+  //     await db.insert('feedbacks',
+  //     feedback.toMap(),
+  //     conflictAlgorithm: ConflictAlgorithm.replace,
+  //     );
+  //   } else {
+  //     print('Feed duplicado');
+  //   }
     
-  }
+  // }
+
+  Future<void> insertUser(String name, String email) async {
+  final db = await database;
+
+  await db.insert(
+    'users',
+    {'name': name, 'email': email},
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
 
   Future<List<Feedbacks>> getFeedbacks() async {
     final Database db = await database;
@@ -62,10 +81,29 @@ class DatabaseHelper {
         messageType: maps[i]['messageType'],
         recipientType: maps[i]['recipientType'],
         gymLocation: maps[i]['gymLocation'],
-        image1: maps[i]['image1'] != null ? File(maps[i]['image1']) : null,
-        image2: maps[i]['image2'] != null ? File(maps[i]['image2']) : null,
+        image1Url: maps[i]['image1'] != null ? File(maps[i]['image1']) : null,
+        image2Url: maps[i]['image2'] != null ? File(maps[i]['image2']) : null,
         timestamp: maps[i]['timestamp'],
+        userId: maps[i]['user_id'],
       );
     });
   }
+
+  Future<String?> getUserNameById(int? userId) async {
+  final dbHelper = DatabaseHelper();
+  final db = await dbHelper.database;
+
+  final List<Map<String, dynamic>> result = await db.query(
+    'users',
+    columns: ['name'], 
+    where: 'id = ?', 
+    whereArgs: [userId],
+  );
+
+  if (result.isNotEmpty) {
+    return result.first['name'] as String?;
+  }
+  
+  return null;
+}
 }
