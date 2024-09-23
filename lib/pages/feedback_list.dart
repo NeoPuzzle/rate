@@ -2,22 +2,22 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fullventas_gym_rate/helper/database_helper.dart';
 import 'package:fullventas_gym_rate/models/feedbackModel.dart';
-import 'package:fullventas_gym_rate/pages/observation_create_screen.dart';
-class RecognitionSuggestionsListScreen extends StatefulWidget {
-  const RecognitionSuggestionsListScreen({super.key});
+import 'package:fullventas_gym_rate/pages/feedback_create_screen.dart';
+class FeedbackListScreen extends StatefulWidget {
+  const FeedbackListScreen({super.key});
 
   @override
-  State<RecognitionSuggestionsListScreen> createState() => _RecognitionSuggestionsListScreen();
+  State<FeedbackListScreen> createState() => _RecognitionSuggestionsListScreen();
 }
 
-class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsListScreen> {
+class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
   final List<Feedbacks> _feedbacks = [];
   // final ApiService _apiService = ApiService();
 
   @override
   void initState() {
     super.initState();
-    // _loadFeedbacks();
+    _loadFeedbacks();
   }
 
   void _loadFeedbacks() async {
@@ -43,8 +43,8 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget> [
-              Text(feedback.timestamp, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
-              Text(feedback.userId!, style: const TextStyle(color: Colors.deepPurple, fontSize: 12)),
+              Text(feedback.timestamp, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+              Text(feedback.userId!, style: const TextStyle(color: Colors.black54, fontSize: 12)),
             ],
           ) ,          
           content: SizedBox(
@@ -55,7 +55,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(feedback.subject, style: const TextStyle(color: Colors.black,fontSize: 18, fontWeight: FontWeight.bold),),
-                  Text(feedback.detail),
+                  Text(feedback.detail, style: const TextStyle(color: Colors.black54),),
                   const SizedBox(height: 20),
                   if (feedback.image1Url != null || feedback.image2Url != null) ...[
                     CarouselSlider(
@@ -85,11 +85,19 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                     ),
                     const SizedBox(height: 10),
                   ],
-                  Text(feedback.messageType,style: const TextStyle(fontWeight: FontWeight.bold),),
-                  Text(feedback.recipientType),
-                  if(feedback.recipientType == 'Gimnasio' && feedback.gymLocation != null) ...[
-                    Text('${feedback.gymLocation}'),
-                  ],                  
+                  Text(feedback.feedbackType,style: const TextStyle(fontWeight: FontWeight.bold),),
+                  // Text(feedback.destinationType),
+                  if(feedback.destinationType == 'Gimnasio' && feedback.gymLocation != null) ...[
+                    RichText(text: TextSpan(
+                      text: '${feedback.destinationType}: ', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold), children: [
+                        TextSpan(text:'${feedback.gymLocation}', style: const TextStyle(color: Colors.black54, fontSize: 14) )
+                      ]
+                    ))
+                  ] else if(feedback.destinationType == 'Aplicacion') ...[
+                    RichText(text: TextSpan(
+                      text: "Para: ", style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold, fontSize: 16), children: [
+                        TextSpan(text: '${feedback.destinationType} ', style: const TextStyle(color: Colors.black54, fontSize: 14))]))
+                  ]                 
                 ],
               ),
             ),
@@ -128,7 +136,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16.0),
                       leading: Icon(
-                        feedback.messageType == 'Reconocimiento'
+                        feedback.feedbackType == 'Reconocimiento'
                           ? Icons.thumb_up
                           : Icons.feedback,
                         color: Colors.orange[700],
@@ -150,7 +158,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                               color: Colors.black54,
                             ),
                           ),
-                          if(feedback.recipientType == 'Gimnasio' && feedback.gymLocation != null) ...[
+                          if(feedback.destinationType == 'Gimnasio' && feedback.gymLocation != null) ...[
                             Text(
                               'Ubicacion: ${feedback.gymLocation}',
                               style: TextStyle(
@@ -178,7 +186,7 @@ class _RecognitionSuggestionsListScreen extends State<RecognitionSuggestionsList
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RecognitionSuggestionsScreen(
+                    builder: (context) => FeedbackCreateScreen(
                       onFeedbackSubmitted: _addFeedback,
                     ),
                   ),
