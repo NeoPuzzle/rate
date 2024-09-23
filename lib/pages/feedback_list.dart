@@ -1,41 +1,47 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:fullventas_gym_rate/helper/database_helper.dart';
-import 'package:fullventas_gym_rate/models/feedbackModel.dart';
+import 'package:fullventas_gym_rate/api/api.service.dart';
+import 'package:fullventas_gym_rate/models/feedbackGetModel.dart';
 import 'package:fullventas_gym_rate/pages/feedback_create_screen.dart';
+import 'package:intl/intl.dart';
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
 
   @override
-  State<FeedbackListScreen> createState() => _RecognitionSuggestionsListScreen();
+  State<FeedbackListScreen> createState() => _FeedbackListScreen();
 }
 
-class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
-  final List<Feedbacks> _feedbacks = [];
-  // final ApiService _apiService = ApiService();
+class _FeedbackListScreen extends State<FeedbackListScreen> {
+  final List<FeedbacksGet> _feedbacks = [];
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadFeedbacks();
+    _fetchFeedback();
   }
 
-  void _loadFeedbacks() async {
-    final dbHelper = DatabaseHelper();
-    final feedbacksDB = await dbHelper.getFeedbacks();
+  Future<void> _fetchFeedback() async {
     setState(() {
-      _feedbacks.clear();
-      _feedbacks.addAll(feedbacksDB);
+    _isLoading = true;
+  });
+  try {
+    List<FeedbacksGet> feedbacks = await _apiService.fetchFeedback();
+    setState(() {
+        _feedbacks.clear();
+        _feedbacks.addAll(feedbacks);
+      });
+  } catch (e) {
+    print('Error fetching feedback: $e');
+  } finally {
+    setState(() {
+      _isLoading = false;
     });
   }
+}
 
-  void _addFeedback(Feedbacks feedback) {
-    setState(() {
-      _feedbacks.add(feedback);
-    });
-  }
-
-  Future<void> _showFeedbackDetails(Feedbacks feedback) async {
+  Future<void> _showFeedbackDetails(FeedbacksGet feedback) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -43,10 +49,10 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget> [
-              Text(feedback.timestamp, style: const TextStyle(color: Colors.black54, fontSize: 12)),
-              Text(feedback.userId!, style: const TextStyle(color: Colors.black54, fontSize: 12)),
+              Text(formatTimestamp(feedback.timestamp), style: const TextStyle(color: Colors.black54, fontSize: 12)),
+              Text(feedback.userName?? 'No User', style: const TextStyle(color: Colors.black54, fontSize: 12)),
             ],
-          ) ,          
+          ) , 
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -55,7 +61,7 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(feedback.subject, style: const TextStyle(color: Colors.black,fontSize: 18, fontWeight: FontWeight.bold),),
-                  Text(feedback.detail, style: const TextStyle(color: Colors.black54),),
+                  Text(feedback.description, style: const TextStyle(color: Colors.black54),),
                   const SizedBox(height: 20),
                   if (feedback.image1Url != null || feedback.image2Url != null) ...[
                     CarouselSlider(
@@ -68,14 +74,14 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                       ),
                       items: [
                         if (feedback.image1Url != null)
-                          Image.file(
+                          Image.network(
                             feedback.image1Url!,
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 200.0,
                           ),
                         if (feedback.image2Url != null)
-                          Image.file(
+                          Image.network(
                             feedback.image2Url!,
                             fit: BoxFit.cover,
                             width: double.infinity,
@@ -85,18 +91,19 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                     ),
                     const SizedBox(height: 10),
                   ],
-                  Text(feedback.feedbackType,style: const TextStyle(fontWeight: FontWeight.bold),),
-                  // Text(feedback.destinationType),
+                  Text(feedback.destinationType ?? 'Desconocido',style: const TextStyle(fontWeight: FontWeight.bold),),
                   if(feedback.destinationType == 'Gimnasio' && feedback.gymLocation != null) ...[
                     RichText(text: TextSpan(
                       text: '${feedback.destinationType}: ', style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold), children: [
                         TextSpan(text:'${feedback.gymLocation}', style: const TextStyle(color: Colors.black54, fontSize: 14) )
-                      ]
-                    ))
+                        ]
+                      )
+                    )
                   ] else if(feedback.destinationType == 'Aplicacion') ...[
                     RichText(text: TextSpan(
                       text: "Para: ", style: const TextStyle(color: Colors.black,fontWeight: FontWeight.bold, fontSize: 16), children: [
-                        TextSpan(text: '${feedback.destinationType} ', style: const TextStyle(color: Colors.black54, fontSize: 14))]))
+                        TextSpan(text: '${feedback.destinationType} ', style: const TextStyle(color: Colors.black54, fontSize: 14))])
+                        )
                   ]                 
                 ],
               ),
@@ -109,6 +116,22 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
               },
               child: const Text('Cerrar'),
             ),
+            TextButton(onPressed: () async{
+              bool? confirm = await dialogConfirmation(context) ;
+              if (confirm == true) {
+              try {
+                      await _apiService.deleteFeedback(feedback.id);
+                      Navigator.of(context).pop();
+                      setState(() {
+                        _feedbacks.remove(feedback);
+                      });
+                    } catch (e) {
+                      print('Error deleting feedback: $e');
+                    }
+              }
+            },
+            child: const Text('Eliminar')
+            )
           ],
         );
       },
@@ -123,7 +146,8 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: _isLoading ? const Center(child: CircularProgressIndicator())
+        : Column(
           children: [
             Expanded(
               child: ListView.builder(
@@ -152,7 +176,7 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            feedback.detail,
+                            feedback.description,
                             style: const TextStyle(
                               fontSize: 16.0,
                               color: Colors.black54,
@@ -168,7 +192,7 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                             ),
                           ],
                           const SizedBox(height: 8),
-                          Text(feedback.timestamp)
+                          Text(formatTimestamp(feedback.timestamp))
                         ],
                       ),
                       trailing: Icon(Icons.arrow_forward_ios, color: Colors.grey[600]),
@@ -186,9 +210,7 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FeedbackCreateScreen(
-                      onFeedbackSubmitted: _addFeedback,
-                    ),
+                    builder: (context) => const FeedbackCreateScreen(),
                   ),
                 );
               },
@@ -203,4 +225,29 @@ class _RecognitionSuggestionsListScreen extends State<FeedbackListScreen> {
       backgroundColor: Colors.blueGrey[900],
     );
   }
+}
+
+
+Future<bool?> dialogConfirmation(BuildContext context) {
+    return showDialog<bool>(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Confirma..', style: TextStyle(color: Colors.grey, fontSize: 16),),
+                  content: const Text("Estas seguro que desea eliminar este feedback?"),
+                  actions: <Widget> [
+                    TextButton(onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text('Cancelar'),
+                    ),
+                    TextButton(onPressed: () => Navigator.of(context).pop(true), 
+                    child: const Text('Eliminar'))
+                  ],
+                );
+              }
+            );
+  }
+
+String formatTimestamp(String timestamp) {
+  DateTime dateTime = DateTime.parse(timestamp);
+  return DateFormat('dd/MM/yyyy HH:mm').format(dateTime);
 }

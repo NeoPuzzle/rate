@@ -5,14 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:fullventas_gym_rate/models/feedbackModel.dart';
 
 class FeedbackCreateScreen extends StatefulWidget {
-  final Function(Feedbacks) onFeedbackSubmitted;
 
-  const FeedbackCreateScreen({super.key,
-  required this.onFeedbackSubmitted
-  });
+  const FeedbackCreateScreen({super.key});
 
   @override
   State<FeedbackCreateScreen> createState() => _FeedbackCreateScreenState();
@@ -166,7 +162,6 @@ class _FeedbackCreateScreenState extends State<FeedbackCreateScreen> {
                       onChanged: (String? newValue) {
                         setState(() {
                           _feedbackTypes = newValue!;
-
                         });
                       },
                       items: _feedbackTypesMap.keys.map<DropdownMenuItem<String>>((String value) {
@@ -175,7 +170,6 @@ class _FeedbackCreateScreenState extends State<FeedbackCreateScreen> {
                           child: Text(value, style: const TextStyle(color: Colors.white)),
                         );
                       }).toList(),
-                      // validator: (value) => value == null ? 'Debe seleccionar un tipo de feedback' : null,
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -341,19 +335,6 @@ class _FeedbackCreateScreenState extends State<FeedbackCreateScreen> {
                         image2Url: _image2,
                         timestamp: formattedDate,
                         userId: userId,
-                      );
-                      widget.onFeedbackSubmitted(
-                        Feedbacks(
-                          subject: _subjectController.text,
-                        detail: _detailController.text,
-                        feedbackType: _feedbackTypes!,
-                        destinationType: _destinationTypes!,
-                        gymLocation: _destinationTypes == 'Gimnasio' ? _gymLocations : null,
-                        image1Url: _image1,
-                        image2Url: _image2,
-                        timestamp: formattedDate,
-                        userId: _currentUserName!,
-                        ),
                       );
                       Navigator.pop(context);
                     }

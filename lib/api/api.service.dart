@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:fullventas_gym_rate/models/feedbackGetModel.dart';
 import 'package:http/http.dart' as http;
 
 class ApiService {
@@ -66,20 +67,34 @@ class ApiService {
     }
   }
 
-  Future<List< dynamic>> fetchFeedback() async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/feedback'));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body);
-      } else {
-        throw Exception('Failed to load feedback');
-      }
-    } catch (e) {
-      print('Error fetching feedback: $e');
-      throw e;
+  Future<List<FeedbacksGet>> fetchFeedback() async {
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/feedbacks'),
+    );
+    
+    if (response.statusCode == 200) {
+      List<dynamic> feedbackList = jsonDecode(response.body);
+      return feedbackList.map((feedback) => FeedbacksGet.fromJson(feedback)).toList().cast<FeedbacksGet>();
+    } else {
+      throw Exception('Failed to load feedback');
+    }
+  } catch (e) {
+    print('Error fetching feedback: $e');
+    throw e;
+  }
+}
+
+Future<void> deleteFeedback(String id) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/feedbacks/$id'),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete feedback');
     }
   }
+
 
   Future<void> createFeedback({
     required String subject,

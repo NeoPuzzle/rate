@@ -1,7 +1,7 @@
 import 'dart:io';
 
 class Feedbacks {
-  final int? id;
+  final String? id;
   final String subject;
   final String detail;
   final String feedbackType;
