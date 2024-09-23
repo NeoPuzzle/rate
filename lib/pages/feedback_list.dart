@@ -4,6 +4,7 @@ import 'package:fullventas_gym_rate/api/api.service.dart';
 import 'package:fullventas_gym_rate/models/feedbackGetModel.dart';
 import 'package:fullventas_gym_rate/pages/feedback_create_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 class FeedbackListScreen extends StatefulWidget {
   const FeedbackListScreen({super.key});
 
@@ -74,19 +75,9 @@ class _FeedbackListScreen extends State<FeedbackListScreen> {
                       ),
                       items: [
                         if (feedback.image1Url != null)
-                          Image.network(
-                            feedback.image1Url!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 200.0,
-                          ),
+                          _buildImageWithShimmer(feedback.image1Url!),
                         if (feedback.image2Url != null)
-                          Image.network(
-                            feedback.image2Url!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: 200.0,
-                          ),
+                          _buildImageWithShimmer(feedback.image2Url!),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -223,6 +214,34 @@ class _FeedbackListScreen extends State<FeedbackListScreen> {
         ),
       ),
       backgroundColor: Colors.blueGrey[900],
+    );
+  }
+
+  Widget _buildImageWithShimmer(String imageUrl) {
+  return FutureBuilder(
+    future: Future.wait([
+      precacheImage(NetworkImage(imageUrl), context),
+      Future.delayed(const Duration(milliseconds: 0)),
+    ]),
+     builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.done) {
+        return Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: 200,
+        );
+      } else {
+        return Shimmer.fromColors( 
+        baseColor: Colors.red[300]!, 
+        highlightColor: Colors.red[100]!,
+        child: Container(
+          width: double.infinity,
+          height: 200,
+          color: Colors.white,),
+          );
+        }
+      }
     );
   }
 }

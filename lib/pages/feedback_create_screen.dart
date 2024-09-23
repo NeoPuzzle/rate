@@ -130,228 +130,228 @@ class _FeedbackCreateScreenState extends State<FeedbackCreateScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Fecha y hora: $formattedDate',
-                style: const TextStyle(fontSize: 14, color: Colors.white70),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'GymMuscle',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _feedbackTypes,
-                      dropdownColor: Colors.black,
-                      decoration: InputDecoration(
-                        labelText: 'Tipo de Feedback',
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.grey[800],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Fecha y hora: $formattedDate',
+                  style: const TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'GymMuscle',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _feedbackTypes,
+                        dropdownColor: Colors.black,
+                        decoration: InputDecoration(
+                          labelText: 'Tipo de Feedback',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.grey[800],
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _feedbackTypes = newValue!;
+                          });
+                        },
+                        items: _feedbackTypesMap.keys.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: const TextStyle(color: Colors.white)),
+                          );
+                        }).toList(),
                       ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _feedbackTypes = newValue!;
-                        });
-                      },
-                      items: _feedbackTypesMap.keys.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value, style: const TextStyle(color: Colors.white)),
-                        );
-                      }).toList(),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _destinationTypes,
-                      dropdownColor: Colors.black,
-                      decoration: InputDecoration(
-                        labelText: 'Destinatario',
-                        labelStyle: const TextStyle(color: Colors.white70),
-                        filled: true,
-                        fillColor: Colors.grey[800],
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _destinationTypes,
+                        dropdownColor: Colors.black,
+                        decoration: InputDecoration(
+                          labelText: 'Destinatario',
+                          labelStyle: const TextStyle(color: Colors.white70),
+                          filled: true,
+                          fillColor: Colors.grey[800],
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _destinationTypes = newValue!;
+                            if (_destinationTypes != 'Gimnasio') {
+                              _gymLocations = null;
+                            }
+                          });
+                        },
+                        items: _destinationTypesMap.keys.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: const TextStyle(color: Colors.white)),
+                          );
+                        }).toList(),
                       ),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _destinationTypes = newValue!;
-                          if (_destinationTypes != 'Gimnasio') {
-                            _gymLocations = null;
-                          }
-                        });
-                      },
-                      items: _destinationTypesMap.keys.map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value, style: const TextStyle(color: Colors.white)),
-                        );
-                      }).toList(),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_destinationTypes == 'Gimnasio') ...[
+                  DropdownButtonFormField<String>(
+                    value: _gymLocations,
+                    dropdownColor: Colors.black,
+                    decoration: InputDecoration(
+                      labelText: 'Local',
+                      labelStyle: const TextStyle(color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _gymLocations = newValue;
+                      });
+                    },
+                    items: _gymLocationsMap.keys.map<DropdownMenuItem<String>>((String location) {
+                      return DropdownMenuItem<String>(
+                        value: location,
+                        child: Text(location, style: const TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
                   ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-              const SizedBox(height: 16),
-              if (_destinationTypes == 'Gimnasio') ...[
-                DropdownButtonFormField<String>(
-                  value: _gymLocations,
-                  dropdownColor: Colors.black,
+                TextFormField(
+                  controller: _subjectController,
                   decoration: InputDecoration(
-                    labelText: 'Local',
+                    labelText: 'Asunto',
                     labelStyle: const TextStyle(color: Colors.white70),
                     filled: true,
                     fillColor: Colors.grey[800],
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   ),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _gymLocations = newValue;
-                    });
-                  },
-                  items: _gymLocationsMap.keys.map<DropdownMenuItem<String>>((String location) {
-                    return DropdownMenuItem<String>(
-                      value: location,
-                      child: Text(location, style: const TextStyle(color: Colors.white)),
-                    );
-                  }).toList(),
+                  validator: _validateField,
+                  style: const TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 16),
+                TextFormField(
+                  controller: _detailController,
+                  maxLines: 5,
+                  maxLength: 250,
+                  decoration: InputDecoration(
+                    labelText: 'Detalle del feedback',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  ),
+                  validator: _validateField,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _pickImage(1),
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(color: Colors.orange, width: 2.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 4.0,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: _image1 == null
+                              ? const Center(child: Text('Imagen 1', style: TextStyle(color: Colors.white)))
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.file(_image1!, fit: BoxFit.cover),
+                                ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _pickImage(2),
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[700],
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(color: Colors.orange, width: 2.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 4.0,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: _image2 == null
+                              ? const Center(child: Text('Imagen 2', style: TextStyle(color: Colors.white)))
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.file(_image2!, fit: BoxFit.cover),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Center(
+                  child: ElevatedButton(
+                    onPressed:() async {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        final userId = _users[_currentUserName!] ?? '';
+                        final messageTypeId = _feedbackTypesMap[_feedbackTypes!] ?? '';
+                        final recipientTypeId = _destinationTypesMap[_destinationTypes!] ?? '';
+                        final gymLocationId = _destinationTypes == 'Gimnasio' ? (_gymLocationsMap[_gymLocations!] ?? '') : '';
+                        
+                        await _apiService.createFeedback(
+                          subject: _subjectController.text,
+                          detail: _detailController.text,
+                          messageType: messageTypeId,
+                          recipientType: recipientTypeId,
+                          gymLocation: gymLocationId,
+                          image1Url: _image1,
+                          image2Url: _image2,
+                          timestamp: formattedDate,
+                          userId: userId,
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                    ),
+                    child: const Text('Enviar', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ),
               ],
-              TextFormField(
-                controller: _subjectController,
-                decoration: InputDecoration(
-                  labelText: 'Asunto',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                ),
-                validator: _validateField,
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _detailController,
-                maxLines: 5,
-                maxLength: 250,
-                decoration: InputDecoration(
-                  labelText: 'Detalle del feedback',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                ),
-                validator: _validateField,
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pickImage(1),
-                      child: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(color: Colors.orange, width: 2.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 4.0,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: _image1 == null
-                            ? const Center(child: Text('Imagen 1', style: TextStyle(color: Colors.white)))
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(12.0),
-                                child: Image.file(_image1!, fit: BoxFit.cover),
-                              ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pickImage(2),
-                      child: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[700],
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(color: Colors.orange, width: 2.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.3),
-                              blurRadius: 4.0,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: _image2 == null
-                            ? const Center(child: Text('Imagen 2', style: TextStyle(color: Colors.white)))
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(12.0),
-                                child: Image.file(_image2!, fit: BoxFit.cover),
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed:() async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      final userId = _users[_currentUserName!] ?? '';
-                      final messageTypeId = _feedbackTypesMap[_feedbackTypes!] ?? '';
-                      final recipientTypeId = _destinationTypesMap[_destinationTypes!] ?? '';
-                      final gymLocationId = _destinationTypes == 'Gimnasio' ? (_gymLocationsMap[_gymLocations!] ?? '') : '';
-                      
-                      await _apiService.createFeedback(
-                        subject: _subjectController.text,
-                        detail: _detailController.text,
-                        messageType: messageTypeId,
-                        recipientType: recipientTypeId,
-                        gymLocation: gymLocationId,
-                        image1Url: _image1,
-                        image2Url: _image2,
-                        timestamp: formattedDate,
-                        userId: userId,
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                  ),
-                  child: const Text('Enviar', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
       backgroundColor: Colors.grey[850],
     );
   }
