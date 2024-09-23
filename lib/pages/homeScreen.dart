@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fullventas_gym_rate/pages/observations_list.dart';
+import 'package:fullventas_gym_rate/pages/feedback_list.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -40,7 +40,7 @@ class HomeScreen extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RecognitionSuggestionsListScreen()),
+                  MaterialPageRoute(builder: (context) => const FeedbackListScreen()),
                 );
               },
             ),
